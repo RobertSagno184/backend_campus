@@ -1,0 +1,406 @@
+// =============================================================================
+// CONFIGURATION PRISMA
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// MODÈLES UTILISATEURS
+// =============================================================================
+
+model Utilisateur {
+  id            Int       @id @default(autoincrement())
+  nom           String
+  prenom        String
+  imageUrl      String?
+  email         String    @unique
+  motdepasse    String
+  token         String?    @db.Text
+  tokenExpiry   DateTime? // Date d'expiration du token
+  derniereConnexion DateTime? // Dernière fois que l'utilisateur s'est connecté
+  derniereActivite DateTime? // Dernière activité de l'utilisateur
+  numero        String?
+  dateNaissance DateTime? @default(now())
+  pays          String?
+  ville         String?
+  estEnLigne    Boolean?   @default(false) //Si l'utilisateur est en ligne ou non
+  estActif      Boolean    @default(false) //Si le mail est activé ou non
+  codeVerification String?  // Code de vérification pour l'activation du compte
+  creeA         DateTime? @default(now())
+  modifieA      DateTime? @updatedAt
+  role          TypeUtilisateur 
+  langue        String?   @default("fr") // Langue préférée de l'utilisateur
+}
+
+
+
+model FavoriFormation {
+  id            String   @id @default(uuid())
+  utilisateurId Int
+  formationId   String
+  creeA         DateTime @default(now())
+  
+  // Relations
+  formation     Formation   @relation(fields: [formationId], references: [id], onDelete: Cascade)
+}
+
+// =============================================================================
+// MODÈLES GÉOGRAPHIQUES
+// =============================================================================
+
+model Pays {
+  id              String   @id @default(uuid())
+  nom             String   @unique
+  nomEn           String
+  nomFr           String
+  drapeau         String   // Emoji flag
+  continent       RoleContinent
+  region          String?  // Pour Amérique du Nord/Sud
+  avantages       String   @db.Text
+  avantagesEn     String   @db.Text
+  avantagesFr     String   @db.Text
+  popularite      Int      @default(50)  //La popularité du pays sur une échelle de 1 à 100
+  cout            Int      // Échelle 1-5
+  langue          String   // Langue(s) officielle(s)
+  monnaie         String
+  creeA           DateTime @default(now()) // Date de création
+  modifieA        DateTime @updatedAt  // Date de modification
+  
+  // Relations
+  guides          Guide[]
+  lettresMotivation LettreMotivation[]
+  paysVilles      PaysVille[] // Relation many-to-many avec les villes
+  themes         Theme[]  
+  
+  @@index([continent])
+  @@index([popularite])
+  @@index([cout])
+
+}
+
+model Theme{
+  id          String   @id @default(uuid())
+  contenuFr   String   @db.Text
+  contenuEn   String   @db.Text
+  pays       Pays     @relation(fields: [paysId], references: [id])
+  paysId     String
+  details    DetailTheme[]
+}
+
+model DetailTheme{
+  id          String   @id @default(uuid())
+  contenuFr   String   @db.Text
+  contenuEn   String   @db.Text
+  theme       Theme     @relation(fields: [themeId], references: [id])
+  themeId     String
+  liens       Lien[]
+}
+
+model Lien{
+  id          String   @id @default(uuid())
+  url         String   @db.VarChar(500)
+  detailTheme DetailTheme @relation(fields: [detailThemeId], references: [id])
+  detailThemeId String
+}
+
+model Ville {
+  id              String   @id @default(uuid())
+  nom             String
+  nomEn           String
+  nomFr           String
+  latitude        Decimal? @db.Decimal(10, 8)
+  longitude       Decimal? @db.Decimal(11, 8)
+  population      Int?
+  creeA           DateTime @default(now())
+  modifieA        DateTime @updatedAt
+  
+  // Relations
+  paysVilles      PaysVille[] // Relation many-to-many avec les pays
+  villeUniversites VilleUniversite[] // Relation many-to-many avec les universités
+  
+  @@index([nom])
+}
+
+// Table de liaison pour pays <-> villes (many-to-many)
+model PaysVille {
+  id      String @id @default(uuid())
+  paysId  String
+  villeId String
+  
+  // Relations
+  pays    Pays   @relation(fields: [paysId], references: [id], onDelete: Cascade)
+  ville   Ville  @relation(fields: [villeId], references: [id], onDelete: Cascade)
+  
+  @@unique([paysId, villeId])
+  @@index([paysId])
+  @@index([villeId])
+}
+
+// =============================================================================
+// MODÈLES ÉDUCATIFS
+// =============================================================================
+
+model Guide {
+  id            String   @id @default(uuid())
+  pays          String
+  section       String
+  etape         Int
+  titre         String
+  titreEn       String
+  titreFr       String
+  description   String   @db.Text
+  descriptionEn String   @db.Text
+  descriptionFr String   @db.Text
+  exemple       String?  @db.Text
+  exempleEn     String?  @db.Text
+  exempleFr     String?  @db.Text
+  documents     Json?    // Array de strings
+  duree         String?
+  cout          String?
+  creeA         DateTime @default(now())
+  modifieA      DateTime @updatedAt
+  
+  // Relations
+  paysRel       Pays     @relation(fields: [pays], references: [nom])
+  
+  @@index([pays, section, etape])
+}
+
+model LettreMotivation {
+  id         String     @id @default(uuid())
+  pays       String
+  type       TypeLettre
+  titre      String
+  titreEn    String
+  titreFr    String
+  contenu    String     @db.Text
+  contenuEn  String     @db.Text
+  contenuFr  String     @db.Text
+  exemple    String     @db.Text
+  exempleEn  String     @db.Text
+  exempleFr  String     @db.Text
+  conseils   Json       // Array de strings
+  conseilsEn Json       // Array de strings
+  conseilsFr Json       // Array de strings
+  creeA      DateTime   @default(now())
+  modifieA   DateTime   @updatedAt
+  
+  // Relations
+  paysRel    Pays       @relation(fields: [pays], references: [nom])
+  
+  @@index([pays, type])
+}
+
+// =============================================================================
+// FORMATIONS
+// =============================================================================
+
+model Formation {
+  id              String   @id @default(uuid())
+  nom             String   @db.VarChar(500)
+  nomEn           String   @db.VarChar(500)
+  nomFr           String   @db.VarChar(500)
+  niveau          String?  // Licence, Master, Doctorat, etc.
+  domaine         String?  // Informatique, Médecine, etc.
+  duree           String?  // "3 ans", "2 ans", etc.
+  diplome         String?  // Type de diplôme délivré
+  langueEnseignement String?
+  coutAnnuel      String?
+  description     String?  @db.Text
+  descriptionEn   String?  @db.Text
+  descriptionFr   String?  @db.Text
+  prerequis       Json?    // Array de prérequis
+  debouches       Json?    // Array de débouchés
+  creeA           DateTime @default(now())
+  modifieA        DateTime @updatedAt
+  
+  // Relations
+  universiteFormations UniversiteFormation[] // Relation many-to-many avec les universités
+  utilisateursFavoris  FavoriFormation[] // Utilisateurs qui aiment cette formation
+  
+  @@index([niveau])
+  @@index([domaine])
+  @@index([nom])
+
+   // Relation one-to-one avec DetailFormation
+  detailFormation     DetailFormation? @relation("DetailFormationToFormation")
+
+
+}
+
+model DetailFormation {
+  id          String      @id @default(uuid())
+  contenuFr   String      @db.Text
+  contenuEn   String      @db.Text
+  lienFr      String?     @db.VarChar(500)
+  lienEn      String?     @db.VarChar(500)
+  videoFr     String?     @db.VarChar(500)
+  videoEn     String?     @db.VarChar(500)
+  formation   Formation   @relation("DetailFormationToFormation", fields: [formationId], references: [id])
+  formationId String      @unique
+}
+
+
+// =============================================================================
+// UNIVERSITÉS MONDIALES
+// =============================================================================
+
+model UniversiteMondiale {
+  id           String                @id @default(uuid())
+  nom          String                @db.VarChar(500)
+  nomEn        String                @db.VarChar(500)
+  nomFr        String                @db.VarChar(500)
+  pays         String
+  siteWeb      String?               @db.VarChar(500)
+  domaine      String?
+  idRor        String?               @db.VarChar(100)
+  latitude     Decimal?              @db.Decimal(10, 8)
+  longitude    Decimal?              @db.Decimal(11, 8)
+  nomNorme     String                @db.VarChar(500) // minuscules, accents supprimés
+  paysNorme    String                // minuscules, accents supprimés
+  fournisseur  FournisseurUniversite
+  dernierSync  BigInt                // epoch ms
+  description  String?               @db.Text
+  descriptionEn String?              @db.Text
+  descriptionFr String?              @db.Text
+  fondee       Int?                  // Année de fondation
+  statut       String?               // Public, Privé, etc.
+  classement   Int?                  // Classement mondial
+  creeA        DateTime              @default(now())
+  modifieA     DateTime              @updatedAt
+  typeEtablissement         StatutEtablissement?
+  
+  // Relations
+  villeUniversites VilleUniversite[] // Relation many-to-many avec les villes
+  universiteFormations UniversiteFormation[] // Relation many-to-many avec les formations
+  
+  @@index([paysNorme])
+  @@index([nomNorme])
+  @@index([pays])
+  @@index([classement])
+}
+
+// Table de liaison pour villes <-> universités (many-to-many)
+model VilleUniversite {
+  id           String            @id @default(uuid())
+  villeId      String
+  universiteId String
+  
+  // Relations
+  ville        Ville             @relation(fields: [villeId], references: [id], onDelete: Cascade)
+  universite   UniversiteMondiale @relation(fields: [universiteId], references: [id], onDelete: Cascade)
+  
+  @@unique([villeId, universiteId])
+  @@index([villeId])
+  @@index([universiteId])
+}
+
+// Table de liaison pour universités <-> formations (many-to-many)
+model UniversiteFormation {
+  id           String            @id @default(uuid())
+  universiteId String
+  formationId  String
+  capacite     Int?              // Nombre de places disponibles
+  fraisInscription String?       // Frais d'inscription spécifiques
+  dateDebut    DateTime?         // Date de début du programme
+  dateFin      DateTime?         // Date de fin du programme
+  langueEnseignement String?     // Langue d'enseignement pour ce programme dans cette université
+  creeA        DateTime          @default(now())
+  modifieA     DateTime          @updatedAt
+  
+  // Relations
+  universite   UniversiteMondiale @relation(fields: [universiteId], references: [id], onDelete: Cascade)
+  formation    Formation         @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  
+  @@unique([universiteId, formationId])
+  @@index([universiteId])
+  @@index([formationId])
+}
+
+// =============================================================================
+// PUBLICITÉS
+// =============================================================================
+
+model Publicite {
+  id            String             @id @default(uuid())
+  titre         String
+  titreEn       String
+  titreFr       String
+  description   String             @db.Text
+  descriptionEn String             @db.Text
+  descriptionFr String             @db.Text
+  urlImage      String?            @db.VarChar(500)
+  urlCible      String             @db.VarChar(500)
+  categorie     CategoriePublicite
+  estActif      Boolean            @default(true)
+  priorite      Int                @default(0)
+  cibleGeo      Json?              // {countries: [string], regions: [string]}
+  creeA         DateTime           @default(now())
+  modifieA      DateTime           @updatedAt
+  
+  @@index([categorie, estActif])
+  @@index([priorite])
+}
+
+// =============================================================================
+// ÉNUMÉRATIONS
+// =============================================================================
+
+enum TypeSection {
+  admission
+  visa
+  logement
+  education
+}
+
+enum TypeLettre {
+  universite
+  visa
+  bourse
+}
+
+enum CategoriePublicite {
+  langue
+  pret
+  assurance
+  logement
+}
+
+enum StatutEtablissement {
+  public
+  prive
+}
+
+enum SourceProgramme {
+  parcoursup
+  onisep
+}
+
+enum FournisseurUniversite {
+  hipo
+  ror
+  personnalise
+}
+
+enum TypeUtilisateur {
+  ETUDIANT
+  ADMIN
+  MODERATEUR
+}
+
+enum RoleContinent {
+  AFRIQUE
+  AMERIQUE
+  ASIE
+  EUROPE
+  OCEANIE
+}
+
+/* */

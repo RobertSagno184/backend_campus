@@ -1,0 +1,80 @@
+# Les routes 
+
+## Utilisateurs
+
+## Restaurant
+
+http://localhost:3000/restaurant/login  #Chemin pour se connecter au restaurant
+http://localhost:3000/restaurant/logout  #Chemin pour se deconnecter au restaurant
+http://localhost:3000/restaurant/creatRest  #Chemin pour créer un nouveau restaurant
+http://localhost:3000/restaurant/modifier/:id #Chemin pour modifier un restaurant par son identifiant
+http://localhost:3000/restaurant/supprimer/:id #Chemin pour supprimer un restaurant par son identifiant
+http://localhost:3000/restaurant/recuperer/:id #Chemin pour récupérer un restaurant par son identifiant
+http://localhost:3000/restaurant/list  #Chemin pour lister tous les restaurants
+
+## Categorie
+
+http://localhost:3000/categorie/creatCategorie  #Chemin pour créer une nouvelle catégorie
+http://localhost:3000/categorie/modifier/:categorieId/restaurant/:restaurantId #Chemin pour modifier une catégorie par son identifiant
+http://localhost:3000/categorie/supprimer/:categorieId/restaurant/:restaurantId #Chemin pour supprimer une catégorie par son identifiant
+http://localhost:3000/categorie/recuperer/:id #Chemin pour récupérer une catégorie par son identifiant
+http://localhost:3000/categorie/list  #Chemin pour lister toutes les catégories
+
+
+## categorie-supplement
+
+http://localhost:3000/categorie-supplement/creatCatSup  #Chemin pour créer une nouvelle catégorie supplémentaire
+http://localhost:3000/categorie-supplement/modifier/:id #Chemin pour modifier une catégorie supplémentaire par son identifiant
+http://localhost:3000/categorie-supplement/supprimer/:id #Chemin pour supprimer une catégorie supplémentaire par son identifiant
+http://localhost:3000/categorie-supplement/recuperer/:id #Chemin pour récupérer une catégorie supplémentaire par son identifiant
+http://localhost:3000/categorie-supplement/list  #Chemin pour lister toutes les catégories supplémentaires
+http://localhost:3000/categorie-supplement/associer-produit #Chemin pour associer une catégorie supplémentaire à un restaurant
+http://localhost:3000/categorie-supplement/dissocier-produit/:produitId/:categorieSupplementId  #Chemin pour dissocier un produit d'une catégorie supplémentaire
+http://localhost:3000/categorie-supplement/modifier-association/:produitId/:categorieSupplementId
+
+
+## commande 
+
+
+http://localhost:3000/commande/creatCom  #Chemin pour créer une nouvelle commande
+
+http://localhost:3000/commande/restaurant/:restaurantId  # #Chemin pour récupérer les commandes d'un restaurant par son identifiant
+http://localhost:3000/commande/etat/:id/:restaurantId #Chemin pour récupérer l'état d'une commande par son identifiant et celui d'un restaurant
+http://localhost:3000/commande/etat/:id/detail/:restaurantId #Chemin pour récupérer les détails d'une commande par son identifiant et celui d'un restaurant
+http://localhost:3000/commande/detail/:detailId/:restaurantId #Chemin pour modifier les détails d'une commande par son identifiant et celui d'un restaurant
+http://localhost:3000/commande/supprimer/detail/:detailId/:restaurantId #Chemin pour supprimer un détail d'une commande par son identifiant et celui d'un restaurant
+http://localhost:3000//supprimer/commande/:id/:restaurantId #Chemin pour supprimer une commande par son identifiant et celui d'un restaurant
+
+
+## Detail-commande
+
+http://localhost:3000/detail-commande/creatDetCom  #Chemin pour créer un nouveau détail de commande
+http://localhost:3000/detail-commande/commande/:commandeId #Chemin pour récupérer les détails d'une commande par son identifiant
+http://localhost:3000/detail-commande/recuperer/:id #Chemin pour récupérer un détail de commande par son identifiant
+###Ça manque beaucoup de routes
+
+
+##Produit 
+
+http://localhost:3000/produit/creatProduit/:restaurantId #Chemin pour créer un nouveau produit en identifiant le restaurant avec son Id
+http://localhost:3000/produit/modifier/:id/:restaurantId #Chemin pour modifier un produit par son identifiant et celui du restaurant
+
+http://localhost:3000/produit/supprimer/:id/:restaurantId #Chemin pour supprimer un produit par son identifiant et celui du restaurant
+
+http://localhost:3000/produit/categorie/:categorieId/:restaurantId #Chemin pour récupérer les produits d'une catégorie par son identifiant et celui du restaurant
+
+###Ça manque beaucoup de routes
+
+
+## produit-supplement
+
+#Utilisateurs
+
+http://localhost:3000/users/creatAdmin #Creer un administrateur
+http://localhost:3000/users/creatGerant #Créer un gérant
+http://localhost:3000/users/modifier/:id #Modifier un utilisateur par son identifiant
+http://localhost:3000/users/supprimer/:id #Supprimer un utilisateur par son identifiant
+http://localhost:3000/users/recuperer/:id #Recuperer un utilisateur par son identifiant
+http://localhost:3000/users/list #Recuperer la liste de tous les utilisateurs
+http://localhost:3000/users/listeGerant #Recuperer la liste des utilisateurs GERANT
+http://localhost:3000/users/modifier-est-en-essai/:id #Recuperer la liste des utilisateurs GERANT

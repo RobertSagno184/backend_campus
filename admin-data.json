@@ -1,0 +1,14 @@
+{
+  "nom": "Administrateur",
+  "prenom": "Système",
+  "email": "admin@gmail.com",
+  "motdepasse": "admin123",
+  "numero": "+33000000000",
+  "dateNaissance": "1990-01-01",
+  "pays": "France",
+  "ville": "Paris",
+  "role": "ADMIN",
+  "estActif": true,
+  "langue": "fr",
+  "code": "123456"
+}
