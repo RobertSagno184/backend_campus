@@ -137,8 +137,15 @@ router.post("/creer", async (req, res) => {
 
 // Récupérer toutes les villes
 router.get("/lire", async (req, res) => {
-  const { pays, continent, population_min, population_max, search, page, limite } =
-    req.query;
+  const {
+    pays,
+    continent,
+    population_min,
+    population_max,
+    search,
+    page,
+    limite,
+  } = req.query;
 
   try {
     const pageNum = page ? parseInt(page) : 1;
@@ -920,11 +927,12 @@ router.get("/stats/general", async (req, res) => {
       },
     });
 
+    // Correction : Utilisation des bons noms de tables (avec majuscules)
     const parContinent = await prisma.$queryRaw`
       SELECT p.continent, COUNT(DISTINCT v.id) as count
-      FROM ville v
-      JOIN paysville pv ON v.id = pv.villeId
-      JOIN pays p ON pv.paysId = p.id
+      FROM Ville v
+      JOIN PaysVille pv ON v.id = pv.villeId
+      JOIN Pays p ON pv.paysId = p.id
       GROUP BY p.continent
       ORDER BY count DESC
     `;
